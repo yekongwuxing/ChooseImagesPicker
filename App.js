@@ -130,7 +130,7 @@ export default class App extends Component {
       width: 300,
       height: 300,
       multiple: true,
-      maxFiles: 9 //ios上默认的值为5：一次选取多个图片的最大值
+      maxFiles: 9-this.state.selectedImages.length //ios上默认的值为5：一次选取多个图片的最大值
     }).then(images => {
       let arr = this.state.selectedImages;
       //concat把多个数组合并成一个数组
