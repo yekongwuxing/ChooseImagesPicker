@@ -19,34 +19,59 @@ import {
   TouchableOpacity
 } from "react-native";
 import ImagePicker, { cleanSingle } from "react-native-image-crop-picker";
-import Toast from 'react-native-root-toast';
-const {width} = Dimensions.get('window');
-
-
+import Toast from "react-native-root-toast";
+import ZoomImage from "./src/clickImageZoom/ZoomImage";
+const { width } = Dimensions.get("window");
 export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedImages: [],
+      selectedImages: []
     };
   }
   renderAddBtn() {
     return (
-      <TouchableOpacity key={"addBtn"} activeOpacity={0.6} onPress={() => {
-        this.pickImage()
-      }}>
-        <Image source={require('./images/ic_add_pics.png')} style={styles.addPicImgBtn}/>
+      <TouchableOpacity
+        key={"addBtn"}
+        activeOpacity={0.6}
+        onPress={() => {
+          this.pickImage();
+        }}
+      >
+        <Image
+          source={require("./src/images/ic_add_pics.png")}
+          style={styles.addPicImgBtn}
+        />
       </TouchableOpacity>
     );
   }
   renderImageItem(item, index) {
-    let imageURI = item;
+    let imageURI = { uri: item };
     return (
-      <TouchableOpacity key={"imageItem" + index} activeOpacity={0.6} onPress={() => {
-          console.log(index);
-      }}>
-        <Image source={imageURI} style={styles.addPicImgBtn}/>
-      </TouchableOpacity>
+      <View>
+        <TouchableOpacity
+          key={"imageItem" + index}
+          activeOpacity={0.6}
+          onPress={() => {
+            console.log(index);
+            var arr = this.state.selectedImages;
+            arr.splice(index, 1); //返回的删除下标为index，长度为1的新数组，arr是去掉删除项之后的数组
+            this.setState({
+              selectedImages: arr
+            });
+          }}
+        >
+          <ZoomImage
+            source={imageURI}
+            imgStyle={styles.addPicImgBtn}
+          />
+
+          <Image
+            source={require("./src/images/photocancel.png")}
+            style={styles.delectBtn}
+          />
+        </TouchableOpacity>
+      </View>
     );
   }
   renderImageRow(arr, start, end, isSecondRow) {
@@ -61,9 +86,9 @@ export default class App extends Component {
     }
     let style = {};
     if (!isSecondRow) {
-      style = {flexDirection: 'row'};
+      style = { flexDirection: "row" };
     } else {
-      style = {flexDirection: 'row', marginTop: 10};
+      style = { flexDirection: "row", marginTop: 10 };
     }
     return (
       <View key={"imageRow" + end} style={style}>
@@ -79,12 +104,10 @@ export default class App extends Component {
     let len = images.length;
     if (len >= 0 && len <= 2) {
       row1.push(this.renderImageRow(images, 0, len, false));
-    }
-     else if (len > 2 && len <=  5) {
+    } else if (len > 2 && len <= 5) {
       row1.push(this.renderImageRow(images, 0, 3, false));
       row2.push(this.renderImageRow(images, 3, len, true));
-    }
-    else{
+    } else {
       row1.push(this.renderImageRow(images, 0, 3, false));
       row2.push(this.renderImageRow(images, 3, 6, true));
       row2.push(this.renderImageRow(images, 6, len, true));
@@ -100,37 +123,52 @@ export default class App extends Component {
 
   pickImage() {
     if (this.state.selectedImages.length >= 9) {
-      Toast.show('最多只能添加9张图片');
+      Toast.show("最多只能添加9张图片");
       return;
     }
     ImagePicker.openPicker({
       width: 300,
       height: 300,
-      multiple:true,
-      maxFiles:9//ios上默认的值为5：一次选取多个图片的最大值
+      multiple: true,
+      maxFiles: 9 //ios上默认的值为5：一次选取多个图片的最大值
     }).then(images => {
       let arr = this.state.selectedImages;
       //concat把多个数组合并成一个数组
-      arr = arr.concat(images.map(i => {
-          return {uri:i.path}
-      }));
-      this.setState({selectedImages: arr});
+      arr = arr.concat(
+        images.map(i => {
+          return i.path;
+        })
+      );
+      this.setState({ selectedImages: arr });
     });
   }
 
   render() {
     return (
-      <View
-        style={styles.container}
-      >
+      <View style={styles.container}>
         <View style={styles.content}>
-          <TextInput multiline={true} style={styles.input} underlineColorAndroid="transparent" placeholder="这一刻的想法..."
-                     onChangeText={(text) => {
-                       this.setState({content: text})
-                     }}/>
+          <TextInput
+            multiline={true}
+            style={styles.input}
+            underlineColorAndroid="transparent"
+            placeholder="这一刻的想法..."
+            onChangeText={text => {
+              this.setState({ content: text });
+            }}
+          />
           {this.renderSelectedImages()}
-          <View style={{flexDirection: 'row', alignItems: 'center', paddingTop: 18, paddingBottom: 10}}>
-            <Image source={require('./images/ic_position.png')} style={{width: 25, height: 25}}/>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingTop: 18,
+              paddingBottom: 10
+            }}
+          >
+            <Image
+              source={require("./src/images/ic_position.png")}
+              style={{ width: 25, height: 25 }}
+            />
             <Text>所在位置</Text>
           </View>
         </View>
@@ -139,29 +177,36 @@ export default class App extends Component {
   }
 }
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      flexDirection: 'column',
-    },
-    content: {
-      backgroundColor: '#FFFFFF',
-      flexDirection: 'column',
-      paddingLeft: 10,
-      paddingRight: 10,
-    },
-    input: {
-        width: width - 20,
-        height: 120,
-        textAlignVertical: 'top',
-        fontSize: 15,
-      },
-      selectedImageContainer: {
-        width: width,
-        flexDirection: 'column',
-      },
-      addPicImgBtn: {
-        width: (width-50)/3,
-        height: (width-50)/3,
-        marginLeft: 10,
-      },
-})
+  container: {
+    flex: 1,
+    marginTop:88,
+    flexDirection: "column"
+  },
+  content: {
+    backgroundColor: "#FFFFFF",
+    flexDirection: "column",
+    paddingLeft: 10,
+    paddingRight: 10
+  },
+  input: {
+    width: width - 20,
+    height: 120,
+    textAlignVertical: "top",
+    fontSize: 15
+  },
+  selectedImageContainer: {
+    width: width,
+    flexDirection: "column"
+  },
+  addPicImgBtn: {
+    width: (width - 50) / 3,
+    height: (width - 50) / 3
+  },
+  delectBtn: {
+    width: 14,
+    height: 14,
+    marginLeft: (width - 50) / 3 - 7,
+    marginRight: 7,
+    marginTop: -(width - 50) / 3 - 7
+  }
+});
